@@ -2,6 +2,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
+const { transport, makeANiceEmail } = require('../mail');
+
 
 const Mutations = {
   //definitions: https://www.apollographql.com/docs/apollo-server/data/resolvers/#resolver-arguments
@@ -118,10 +120,18 @@ const Mutations = {
       where: { email: args.email },
       data: { resetToken, resetTokenExpiry }
     });
-    console.log(res);
-    return { message: 'Thanks' };
     // 3. email them the reset token
-
+    const mailRes = await transport.sendMail({
+      from: 'louxor@underscore.com',
+      to: user.email,
+      subject: 'Your Password Reset Token',
+      html: makeANiceEmail(`Your Password Reset Token is here!
+      \n\n
+      <a href="${process.env
+        .FRONTEND_URL}/reset?resetToken=${resetToken}">Click Here to Reset</a>`),
+    });
+    // 4. return the message
+    return { message: 'Thanks' };
   },
 
   async resetPassword(parent, args, ctx, info) {
