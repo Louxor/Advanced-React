@@ -8,11 +8,20 @@ const { transport, makeANiceEmail } = require('../mail');
 const Mutations = {
   //definitions: https://www.apollographql.com/docs/apollo-server/data/resolvers/#resolver-arguments
   async createItem(parent, args, ctx, info) {
-    // TODO: Check if they are logged in
+    // Check if they are logged in
+    if (!ctx.request.userId) {
+      throw new Error('You must be logged in to do that!');
+    }
 
     const item = await ctx.db.mutation.createItem(
       {
         data: {
+          // this is how we create a relationship between the item and the user
+          user: {
+            connect: {
+              id: ctx.request.userId
+            }
+          },
           ...args,
         },
       },
