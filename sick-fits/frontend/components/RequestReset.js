@@ -29,7 +29,7 @@ class Signin extends Component {
                 {(reset, { error, loading, called }) => (
                     <Form method="post" onSubmit={async (e) => {
                         e.preventDefault();
-                        const success = await reset();
+                        await reset();
                         this.setState({ email: '' })
                     }}>
                         <fieldset disabled={loading} aria-busy={loading}>
